@@ -16,23 +16,30 @@ export const uploadpost = async (req, res) => {
       mediaType,
       caption,
       media,
-      author: req.user.id,
+      author: req.userId,
     });
 
-    const user = await userModel.findById(req.user.id);
-    user.posts.push(NewPost._id);
-    await user.save();
+    // const user = await userModel.findById(req.userId);
+    // user.posts.push(NewPost._id);
+    // await user.save();
+
+    // Update User Document
+    await userModel.findByIdAndUpdate(req.userId, {
+      $push: { posts: newPost._id }
+    });
 
     const populatePost = await postModel
       .findById(NewPost._id)
       .populate("author", "firstName username profileImg");
+
     return res.status(200).json({
+      success: true,
       message: "post created!",
-      post: NewPost,
-      populatePost: populatePost,
+      post: populatePost,
     });
   } catch (error) {
-    console.log(`upload error ${error}`);
+    console.error(`Upload error: ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -42,27 +49,87 @@ export const getAllPosts = async (req, res) => {
       .find({})
       .populate("author", "name userName profileImg")
       .sort({ createdAt: -1 });
-      
+
     return res.status(200).json({
+      success: true,
+      count: posts.length,
       message: "fetch all posts",
       posts: posts,
     });
   } catch (error) {
     console.log(`get posts error ${error}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 export const likePost = async (req, res) => {
   try {
+    const postId = req.params.postId;
+    const post = await postModel.findById(postId);
+
+    if(!post){
+        return res.status(400).json({message:"post not found"});
+    }
+
+    // const alreadyLiked = post.likes.some(
+    //     (id) => id.toString() == req.userId.toString()
+    // )
+    // if(alreadyLiked){
+    //    post.likes = post.likes.filter(
+    //      (id) => id.toString() != req.userId.toString()
+    //    )
+    // }else{
+    //    post.likes.push(req.userId)
+    // }
+
+    const isLiked = post.likes.includes(req.userId);
+    // Pure array ko map/filter karne ke bajaye Mongoose ka pull/push use karein (Fast)
+    if (isLiked) {
+      post.likes.pull(req.userId); // Automatically removes ID
+    } else {
+      post.likes.push(req.userId); // Adds ID
+    }
+
+    await post.save();
+    await post.populate("author", "name username profileImg");
+    return res.status(200).json({
+        success: true,
+        message: isLiked ? "Post unliked" : "Post liked",
+        post,
+    })
   } catch (error) {
     console.log(`get posts error ${error}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 export const commentPost = async (req, res) => {
   try {
+    const {message} = req.body;
+    const postId = req.params.postId;
+
+    const post = await postModel.findById(postId);
+    if(!post){
+        return res.status(400).json({
+            message:"post not found!"
+        })
+    }
+
+    post.comments.push({
+        author:req.userId,
+        message
+    })
+
+    await post.save();
+    await post.populate("author", "name username profileImg");
+    return res.status(200).json({
+        success: true,
+        message: "add comments",
+        post,
+    })
   } catch (error) {
     console.log(`get posts error ${error}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 

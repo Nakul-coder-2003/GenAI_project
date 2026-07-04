@@ -25,10 +25,16 @@ const userSchema = new mongoose.Schema({
     },
     profileImg:{
         type:String
-    }
+    },
+    posts:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Post"
+        }
+    ]
 },{timestamps:true});
 
-const userModel = mongoose.model("user",userSchema);
+const userModel = mongoose.model("User",userSchema);
 
 export default userModel;
 

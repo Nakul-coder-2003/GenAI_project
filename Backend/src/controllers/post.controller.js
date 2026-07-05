@@ -135,7 +135,66 @@ export const commentPost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
   try {
+    const {postId} = req.params;
+    const post = await postModel.findById(postId);
+
+    if(!post){
+      return res.status(400).json({success: "false" ,message:"post not fount!"})
+    }
+
+    // 🔒 Security Check:
+    if(post.author.toString() !== req.userId.toString()){
+      return res.status(400).json({success: "false",message:"unauthoraized user"})
+    }
+
+    //delete post
+    await post.findByIdAndDelete(postId);
+
+    // User ke posts array se bhi is id ko hatayein
+    await userModel.findByIdAndUpdate(req.userId, {
+      $pull : {posts: postId}
+    })
+
+    return res.status(200).json({
+      success: true,
+      message: "Post deleted successfully!",
+    });
+
   } catch (error) {
-    console.log(`get posts error ${error}`);
+    console.error(`Delete post error: ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const editPost = async(req,res)=>{
+  try {
+    const {postId} = req.params;
+    const {caption} = req.body;
+    const post = await postModel.findById(postId);
+
+    if(!post){
+      return res.status(400).json({success: "false" ,message:"post not fount!"})
+    }
+
+    //🔒 Security Check:
+    if(post.author.toString() !== req.userId.toString()){
+      return res.status(400).json({success: "false",message:"unauthoraized user"})
+    }
+
+    const updatedPost = await postModel.findByIdAndUpdate(
+      postId,
+      {$set: {caption}},
+      {new:true} // Isse updated data return hota hai
+    ).populate("author","firstName username profileImg");
+
+    return res.status(200).json({
+      success:true,
+      message:"post update successfully!",
+      post: updatedPost
+    })
+
+  } catch (error) {
+    console.error(`edit post error: ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+}

@@ -1,7 +1,7 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import generateToken from "../config/token.js";
-import { blocklistModel } from "../models/blicklist.model.js";
+import { blocklistModel } from "../models/blocklist.model.js";
 import uploadOnCloudinary from "../config/cloudinary.js";
 
 export const signup = async (req, res) => {
@@ -107,7 +107,7 @@ export const logout = async (req, res) => {
       await blocklistModel.create({ token });
     }
 
-    res.clearCookie(token).json({message:"user logout successfully"});
+    res.clearCookie("token").json({message:"user logout successfully"});
   } catch (error) {
     console.log(error);
   }
@@ -142,3 +142,41 @@ export const getloginUserInfo = async (req, res) => {
     console.log(error);
   }
 };
+
+export const forgetPassword = async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log(`forget password error ${error}`);
+    return res.status(400).json({success:"false",message:"internal server error"})
+  }
+}
+
+
+export const resetPassword = async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log(`reset password error ${error}`);
+    return res.status(400).json({success:"false",message:"internal server error"})
+  }
+}
+
+export const sendOtp = async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log(`forget password error ${error}`);
+    return res.status(400).json({success:"false",message:"internal server error"})
+  }
+}
+
+export const verifyOtp = async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log(`forget password error ${error}`);
+    return res.status(400).json({success:"false",message:"internal server error"})
+  }
+}
+

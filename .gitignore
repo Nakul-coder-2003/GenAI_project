@@ -1,7 +1,9 @@
 # Backend ke liye
 backend/node_modules/
 backend/.env
+backend/logs/
 
 # frontend ke liye
 frontend/node_modules/
 frontend/.env
+

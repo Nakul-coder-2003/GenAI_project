@@ -1,5 +1,5 @@
 import express from "express"
-import { commentPost, deletePost, editPost, getAllPosts, likePost, uploadpost } from "../controllers/post.controller.js";
+import { commentPost, deletePost, editPost, getAllPosts, getUserPosts, likePost, uploadpost } from "../controllers/post.controller.js";
 import { uploadFile } from "../middleware/multer.middleware.js";
 import { isAuthenticate } from "../middleware/auth.middleware.js";
 
@@ -13,6 +13,6 @@ postRouter.post("/like/:postId",likePost);
 postRouter.post("/comment/:postId",commentPost);
 postRouter.patch("/edit/:postId",editPost);
 postRouter.delete("/delete/:postId",deletePost);
-// postRouter.get("/getUserPosts/:userId",isAuthenticate,getUserPosts);
+postRouter.get("/getUserPosts/:userId",getUserPosts);
 
 export default postRouter;

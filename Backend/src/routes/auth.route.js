@@ -1,5 +1,5 @@
 import express from "express"
-import { forgetPassword, getAllUser, getloginUserInfo, login, logout, resetPassword, sendOtp, signup, verifyOtp } from "../controllers/auth.controller.js";
+import { forgetPassword, login, logout, resetPassword,signup, verifyOtp } from "../controllers/auth.controller.js";
 import { isAuthenticate } from "../middleware/auth.middleware.js";
 import { uploadFile } from "../middleware/multer.middleware.js";
 

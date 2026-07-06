@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const otpSchema = new mongoose.Schema({
     email:{
-        type:true,
+        type:String,
         required:true
     },
     otp:{

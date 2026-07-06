@@ -1,11 +1,11 @@
-import { OtpModel } from "../models/otpModel.js";
+import { otpModel } from "../models/otp.model.js";
 
 export const generateAndSaveOtp = async (email) => {
   // 6 digit ka random number generate karein
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Database mein save ya update karein
-  await OtpModel.findOneAndUpdate(
+  await otpModel.findOneAndUpdate(
     { email },
     { otp, createdAt: new Date() },
     { upsert: true, new: true }

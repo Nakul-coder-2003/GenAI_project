@@ -1,36 +1,34 @@
-export const currUser = async(req,res)=>{
-  try {
-    
-  } catch (error) {
-    console.log(`currUser error ${error}`);
-    return res.status(400).json({success:"false",message:"internal server error"})
-  }
-}
+import { catchAsync } from "../utils/catchAsync.js";
 
-export const suggestUsers = async(req,res)=>{
-  try {
-    
-  } catch (error) {
-    console.log(`suggestUsers ${error}`);
-    return res.status(400).json({success:"false",message:"internal server error"})
-  }
-}
+export const currUser = catchAsync(async(req,res,next)=>{
+  
+})
 
-export const getProfile = async(req,res)=>{
-  try {
-    
-  } catch (error) {
-    console.log(`getProfile ${error}`);
-    return res.status(400).json({success:"false",message:"internal server error"})
-  }
-}
+export const suggestUsers = catchAsync(async(req,res,next)=>{
+  
+})
 
-export const editProfile = async(req,res)=>{
-  try {
-    
-  } catch (error) {
-    console.log(`editProfile ${error}`);
-    return res.status(400).json({success:"false",message:"internal server error"})
-  }
-}
+export const getProfile = catchAsync(async(req,res,next)=>{
+ 
+})
+
+export const editProfile = catchAsync( async(req,res,next) =>{
+
+} )
+
+export const followHandler = catchAsync(async(req,res,next)=>{
+  
+})
+
+export const followersHandler = catchAsync(async(req,res,next)=>{
+  
+})
+
+export const followingHandler = catchAsync(async(req,res,next)=>{
+ 
+})
+
+export const searchHandler = catchAsync(async(req,res,next)=>{
+ 
+})
 

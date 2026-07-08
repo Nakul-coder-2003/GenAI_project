@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { blocklistModel } from "../models/blocklist.model.js";
+import AppError from "../utils/AppError.js";
 
 export const isAuthenticate = async (req, res, next) => {
   try {
@@ -24,3 +25,12 @@ export const isAuthenticate = async (req, res, next) => {
     return res.status(400).json({message:"authenticate errro"})
   }
 };
+
+export const restrictTo = (...roles)=>{
+   return (req,res,next)=>{
+    if(!roles.includes(req.user.role)){
+      return next(new AppError("You do not have permission to perform this action",400))
+    }
+    next();
+   }
+}

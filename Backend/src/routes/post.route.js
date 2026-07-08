@@ -1,7 +1,7 @@
 import express from "express"
 import { commentPost, deletePost, editPost, getAllPosts, getUserPosts, likePost, uploadpost } from "../controllers/post.controller.js";
 import { uploadFile } from "../middleware/multer.middleware.js";
-import { isAuthenticate } from "../middleware/auth.middleware.js";
+import { isAuthenticate, restrictTo } from "../middleware/auth.middleware.js";
 
 const postRouter = express.Router();
 
@@ -12,7 +12,7 @@ postRouter.get("/getAllPosts",getAllPosts);
 postRouter.post("/like/:postId",likePost);
 postRouter.post("/comment/:postId",commentPost);
 postRouter.patch("/edit/:postId",editPost);
-postRouter.delete("/delete/:postId",deletePost);
+postRouter.delete("/delete/:postId",restrictTo("admin"),deletePost);
 postRouter.get("/getUserPosts/:userId",getUserPosts);
 
 export default postRouter;

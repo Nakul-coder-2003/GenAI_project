@@ -1,9 +1,9 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import { postModel } from "../models/post.model.js";
 import userModel from "../models/user.model.js";
+import { catchAsync } from "../utils/catchAsync.js";
 
-export const uploadpost = async (req, res) => {
-  try {
+export const uploadpost = catchAsync(async (req, res) => {
     const { mediaType, caption } = req.body;
     let media;
     if (req.file) {
@@ -37,11 +37,7 @@ export const uploadpost = async (req, res) => {
       message: "post created!",
       post: populatePost,
     });
-  } catch (error) {
-    console.error(`Upload error: ${error.message}`);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-};
+});
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -85,9 +81,9 @@ export const likePost = async (req, res) => {
     const isLiked = post.likes.includes(req.userId);
     // Pure array ko map/filter karne ke bajaye Mongoose ka pull/push use karein (Fast)
     if (isLiked) {
-      post.likes.pull(req.userId); // Automatically removes ID
+      await post.likes.pull(req.userId); // Automatically removes ID
     } else {
-      post.likes.push(req.userId); // Adds ID
+      await post.likes.push(req.userId); // Adds ID
     }
 
     await post.save();
@@ -199,11 +195,31 @@ export const editPost = async(req,res)=>{
   }
 }
 
-export const getUserPosts = async(req,res)=>{
+export const savedPost = (req,res)=>{
   try {
+    const {postId} = req.params;
+    const post = await postModel.findById(postId);
+    const user = await userModel.findById(req.userId);
+
+    if(!post){
+      return res.status(400).json({message:"post not found"})
+    }
+
+    const isSaved = user.saved.includes(postId);
+    if(isSaved){
+      //unsaved logic
+      await user.saved.pull(postId);
+    }else{
+      await user.saved.push(postId);
+    }
     
+    await user.save();
+    return res.status(200).json({
+      success:true,
+      message:"post saved successfully!"
+    })
   } catch (error) {
-    console.log(error);
+    console.error(`saved post error: ${error.message}`);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 }

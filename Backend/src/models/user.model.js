@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    username:{
+    userName:{
         type:String,
         unique:[true,"username already exist"],
         required:true
@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type:String,
-        required:true
+        required:true,
+        select:false
     },
     firstName:{
         type:String,
@@ -31,7 +32,34 @@ const userSchema = new mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
             ref:"Post"
         }
-    ]
+    ],
+    role:{
+        type:String,
+        enum:["user","admin"],
+        default:"user"
+    },
+    bio:{
+        type:String,
+        default:""
+    },
+    followers:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    following:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    saved:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
 },{timestamps:true});
 
 const userModel = mongoose.model("User",userSchema);

@@ -9,9 +9,9 @@ import { catchAsync } from "../utils/catchAsync.js";
 import AppError from "../utils/AppError.js";
 
 export const signup = catchAsync(async (req, res, next) => {
-  const { username, email, password, firstName, lastName } = req.body;
+  const { userName, email, password, firstName, lastName } = req.body;
 
-  if (!username || !email || !password || !firstName || !lastName) {
+  if (!userName || !email || !password || !firstName || !lastName) {
     return next(new AppError("Please fill all required details",400))
   }
 
@@ -21,7 +21,7 @@ export const signup = catchAsync(async (req, res, next) => {
   }
 
   const isUserAlreadyExists = await userModel.findOne({
-    $or: [{ username }, { email }],
+    $or: [{ userName }, { email }],
   });
 
   if (isUserAlreadyExists) {
@@ -50,7 +50,7 @@ export const signup = catchAsync(async (req, res, next) => {
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  const user = await userModel.findOne({ email });
+  const user = await userModel.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new AppError("Invalid user",400))
@@ -71,7 +71,7 @@ export const login = catchAsync(async (req, res, next) => {
       message: "user login successfully!",
       user: {
         id: user._id,
-        username: user.username,
+        userName: user.userName,
         email: user.email,
       },
     });

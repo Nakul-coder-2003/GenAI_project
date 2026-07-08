@@ -11,8 +11,6 @@ userProfileRouter.get("/suggestUsers", suggestUsers)
 userProfileRouter.get("/getProfile/:userName",getProfile)
 userProfileRouter.patch("/editProfile",editProfile)
 userProfileRouter.patch("/follow/:targetUserId",followHandler)
-userProfileRouter.get("/followers/:userId", followersHandler)
-userProfileRouter.get("/following/:userId",followingHandler)
 userProfileRouter.get("/search",searchHandler)
 
 export default userProfileRouter;

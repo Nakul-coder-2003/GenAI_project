@@ -13,6 +13,6 @@ postRouter.post("/like/:postId",likePost);
 postRouter.post("/comment/:postId",commentPost);
 postRouter.patch("/edit/:postId",editPost);
 postRouter.delete("/delete/:postId",restrictTo("admin"),deletePost);
-postRouter.get("/getUserPosts/:userId",getUserPosts);
+
 
 export default postRouter;

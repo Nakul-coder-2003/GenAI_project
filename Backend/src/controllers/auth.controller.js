@@ -138,3 +138,10 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
     .status(200)
     .json({ message: "OTP verified successfully", isVerified: true });
 });
+
+export const OauthController = catchAsync(async(req,res,next) => {
+  const token = generateToken(req.user._id);
+  res
+    .cookie("token", token)
+    .redirect("http://localhost:3000/dashboard");
+})

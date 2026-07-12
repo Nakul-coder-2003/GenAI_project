@@ -41,16 +41,37 @@ export const uploadpost = catchAsync(async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await postModel
-      .find({})
-      .populate("author", "name userName profileImg")
-      .sort({ createdAt: -1 });
+    const { page, limit, sort, mediaType, search } = req.query;
+    const queryObj = {};
+    if (mediaType) {
+        queryObj.mediaType = mediaType;
+    }
+    if (search) {
+        queryObj.caption = { $regex: search, $options: "i" }; // 'i' means case-insensitive
+    }
+    const posts = await postModel.find(queryObj)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("author", "username firstName lastName profileImg");
 
-    return res.status(200).json({
-      success: true,
-      count: posts.length,
-      message: "fetch all posts",
-      posts: posts,
+    // let postQuery = postModel.find(queryObj).sort(sort).skip((page-1)*limit).limit(limit).populate("aithor")
+    // const posts = await postQuery;
+ 
+    const totalPosts = await postModel.countDocuments(queryObj);
+    const totalPages = Math.ceil(totalPosts / limit);
+    res.status(200).json({
+        success: true,
+        results: posts.length,
+        metadata: {
+            totalPosts,
+            totalPages,
+            currentPage: page,
+            limit
+        },
+        data: {
+            posts
+        }
     });
   } catch (error) {
     console.log(`get posts error ${error}`);
@@ -195,7 +216,7 @@ export const editPost = async(req,res)=>{
   }
 }
 
-export const savedPost = (req,res)=>{
+export const savedPost = async(req,res)=>{
   try {
     const {postId} = req.params;
     const post = await postModel.findById(postId);
@@ -223,3 +244,39 @@ export const savedPost = (req,res)=>{
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 }
+
+export const getUserPosts = catchAsync(async (req,res,next)=>{
+    const {userId} = req.params;
+    const {page,limit,sort,mediaType} = req.query;
+
+    const queryObj = {author : userId};
+
+    if(mediaType){
+      queryObj.mediaType = mediaType;
+    }
+
+    let postQuery = postModel.find(queryObj)
+          .sort(sort)
+          .skip((page-1)*limit)
+          .limit(limit);
+
+    const posts = await postQuery;
+
+    // Total counts nikal lo metadata ke liye
+    const totalPosts = await postModel.countDocuments(queryObj);
+    const totalPages = Math.ceil(totalPosts/limit);
+
+    res.status(200).json({
+      success:true,
+      results:posts.length,
+      metaData:{
+        totalPages,
+        totalPosts,
+        currentPage:page,
+        limit
+      },
+      data:{
+        posts
+      }
+    })
+});

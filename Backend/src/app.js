@@ -6,6 +6,7 @@ import postRouter from "./routes/post.route.js";
 import authRouter from "./routes/auth.route.js";
 import userProfileRouter from "./routes/userProfile.route.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
+import passport from "passport";
 
 const app = express();
 
@@ -18,11 +19,8 @@ app.use("/api/auth",authRouter);
 app.use("/api/post",postRouter);
 app.use("/api/user",userProfileRouter)
 
-// Undefined Routes ko handle karna
-// app.all('*', (req, res, next) => {
-//   next(new AppError(`Can't find this path on this server!`, 404));
-// });
 
+app.use(passport.initialize())
 // GLOBAL ERROR HANDLER
 app.use(globalErrorHandler);
 

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dev Shop - Buy Projects</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f9;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .product-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .btn {
+        background: #6772e5;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn:hover {
+        background: #5465ff;
+      }
+      #payment-box {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #6772e5;
+        border-radius: 6px;
+      }
+      #card-element {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fafafa;
+      }
+      #payment-message {
+        margin-top: 10px;
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🚀 Dev Project Shop (Stripe Test Mode)</h2>
+
+      <div class="product-card">
+        <div>
+          <h3>E-Commerce ETL Pipeline Project</h3>
+          <p>Tech: Python, SQL Server, Power BI</p>
+        </div>
+        <div>
+          <strong style="font-size: 18px">₹499</strong> &nbsp;
+          <button class="btn" onclick="initiateCheckout(499, 'proj_etl_01')">
+            Buy Now
+          </button>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div>
+          <h3>Social Media Backend Engine</h3>
+          <p>Tech: Node.js, Express, MongoDB, Zod</p>
+        </div>
+        <div>
+          <strong style="font-size: 18px">₹699</strong> &nbsp;
+          <button class="btn" onclick="initiateCheckout(699, 'proj_soc_02')">
+            Buy Now
+          </button>
+        </div>
+      </div>
+
+      <div id="payment-box">
+        <h3>🔒 Secure Card Payment</h3>
+        <p>Paying: <span id="payment-amount-text">₹0</span></p>
+        <div id="card-element"></div>
+        <button class="btn" id="submit-pay-btn" onclick="processCardPayment()">
+          Confirm & Pay
+        </button>
+        <div id="payment-message"></div>
+      </div>
+    </div>
+
+    <script>
+      // 1. Apni Stripe Publishable Key yahan daalo (Stripe dashboard se pk_test_... wali)
+      const stripe = Stripe(
+        "pk_test_51Tsh7V6OEEpjalpAn2zRnfaXNBEAtkaesuwhnAvCVLBD9JIYHIeFO6AoPyw1ek3mWil7WiCNxCAOgB6cMx7dxV7J00RMl9EdtX",
+      );
+      let elements;
+      let cardElement;
+      let currentClientSecret = null;
+
+      // 2. Step 1: Backend se Client Secret mangwana jab user "Buy Now" click kare
+      async function initiateCheckout(amount, productId) {
+        document.getElementById("payment-amount-text").innerText = "₹" + amount;
+        document.getElementById("payment-box").style.display = "block";
+
+        try {
+          // index.html ke andar is section ko dhundo aur badlo:
+          const response = await fetch("/api/payment/create-intent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount, productId }),
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            currentClientSecret = data.clientSecret;
+            setupStripeFields();
+          } else {
+            // 🔴 ISS LINE KO UPDATE KARO TAILKI ACTUAL ERROR DIKHE
+            alert("Stripe Error: " + (data.message || "Something went wrong"));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Make sure you are logged in (Token Cookie must be present)");
+        }
+      }
+
+      // 3. Step 2: Browser screen par secure card form input dikhana
+      function setupStripeFields() {
+        if (!elements) {
+          elements = stripe.elements();
+          cardElement = elements.create("card");
+          cardElement.mount("#card-element");
+        }
+      }
+
+      // 4. Step 3: Real execution of confirmation via Stripe servers
+      async function processCardPayment() {
+        if (!currentClientSecret) return;
+
+        const payBtn = document.getElementById("submit-pay-btn");
+        const msgDiv = document.getElementById("payment-message");
+        payBtn.innerText = "Processing...";
+        payBtn.disabled = true;
+
+        const result = await stripe.confirmCardPayment(currentClientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: { name: "Test User Nakul" },
+          },
+        });
+
+        if (result.error) {
+          msgDiv.style.color = "red";
+          msgDiv.innerText = "❌ Payment Failed: " + result.error.message;
+          payBtn.innerText = "Confirm & Pay";
+          payBtn.disabled = false;
+        } else {
+          if (result.paymentIntent.status === "succeeded") {
+            msgDiv.style.color = "green";
+            msgDiv.innerText =
+              "🎉 Success! Payment Intent ID: " + result.paymentIntent.id;
+            payBtn.innerText = "Paid Successfully";
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
